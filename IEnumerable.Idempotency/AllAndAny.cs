@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace IEnumerable.Idempotency
@@ -9,25 +10,29 @@ namespace IEnumerable.Idempotency
 
         public AllAndAny()
         {
-            for (int i = 0; i < max; i++)
-            {
-
-            }
+            _listCollection = GetValuesInts().ToList();
         }
 
-        private List<int> listCollection = new List<int>();
+        public AllAndAny(bool initList)
+        {
+            _listCollection = initList ? GetValuesInts().ToList() : new List<int>();
+        }
+
+        private readonly List<int> _listCollection;
 
 
-        public IEnumerable<int> ListBackedEnumerable { get { return listCollection; } }
+        public IEnumerable<int> ListBackedEnumerable => _listCollection;
 
-        public IEnumerable<int> RealtimeDownloadedEnumerable()
+        public IEnumerable<int> RealtimeDownloadedEnumerable => GetValuesInts();
+
+        private static IEnumerable<int> GetValuesInts()
         {
             var randomGen = new Random(DateTime.Now.Second * DateTime.Now.Minute);
-            int maxValue = randomGen.Next(1000, 2000);
-            for (int i = 0; i < maxValue; i++)
+            var maxValue = randomGen.Next(1000, 2000);
+            for (var i = 0; i < maxValue; i++)
             {
                 //simulate some network activity
-                Thread.Sleep(200);
+                Thread.Sleep(10);
                 yield return Math.Abs(randomGen.Next(500065) - maxValue);
             }
         }
